@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.env
+
+# Node.js (Backend & Frontend)
+node_modules/
+dist/
+.next/
+build/
+npm-debug.log
+yarn-error.log
+
+# IDE
+.vscode/
+.idea/
