@@ -6,7 +6,7 @@ Traffic Law Chatbot is an AI-powered application designed to query and answer qu
 
 - **Accurate Retrieval (RAG)**: Search for relevant laws in the Chroma vector database built from official Vietnamese legal documents.
 - **Optimized Reranking**: Utilize `bge-reranker-base` to score and filter the most relevant document passages for the user's question.
-- **Smart Response Generation**: Powered by the `Llama-3.3-70B-Instruct` large language model via Hugging Face Hub API to generate high-quality responses with clear legal citations.
+- **Smart Response Generation**: Powered by the `Llama-3.3-70B-Instruct` large language model, fine-tuned on Vietnamese traffic law datasets using **QLoRA (Quantized Low-Rank Adaptation)** to achieve deep domain understanding and precise legal phrasing. Served via Hugging Face Hub API.
 - **Modern Interface**: Smooth real-time chat experience (streaming responses) provided by a complete web application built with a NestJS backend and Next.js frontend.
 
 ## 🚀 Quick Start
@@ -64,7 +64,8 @@ The user interface will run at `http://localhost:3000`.
 - **Chroma**: A local vector database for storing and querying embeddings.
 - **Sentence Transformers**: `paraphrase-multilingual-MiniLM-L12-v2` for generating high-quality Vietnamese text embeddings.
 - **CrossEncoder**: `bge-reranker-base` to perform document reranking and relevancy ranking.
-- **Hugging Face Hub API**: Connects to and streams tokens from the `Llama-3.3-70B-Instruct` model.
+- **Hugging Face Hub API**: Connects to and streams tokens from the fine-tuned model.
+- **QLoRA (Quantized Low-Rank Adaptation)**: Used to fine-tune the foundation model on domestic traffic legal records and case files for specialized Vietnamese law comprehension.
 
 ### Backend Gateway (Node.js)
 - **NestJS**: Manages API gateway routing and forwards data streams from the FastAPI AI service to the Next.js frontend.
@@ -79,4 +80,4 @@ The user interface will run at `http://localhost:3000`.
 2. **Keyword Optimization (Condense)**: FastAPI receives the question, reviews the chat history, and uses Llama-3 to rewrite it into a standalone question using formal Vietnamese legal terms.
 3. **Retrieval**: Queries the top 15 most similar document chunks from Chroma using the condensed question.
 4. **Reranking**: Uses CrossEncoder to score the 15 retrieved documents and filters for the top 2 best results.
-5. **Answer Generation**: Constructs a prompt containing the selected documents along with their legal sources and calls the Llama-3.3-70B model to stream the final answer back to the user.
+5. **Answer Generation**: Constructs a prompt containing the selected documents along with their legal sources and calls the QLoRA fine-tuned model via Hugging Face API to stream the final answer back to the user.
