@@ -15,3 +15,6 @@ yarn-error.log
 # IDE
 .vscode/
 .idea/
+
+# Database
+chroma_db_pdf/

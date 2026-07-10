@@ -1,299 +1,82 @@
-# SEFT-RAG: Self-Reflective Retrieval-Augmented Generation
+# Traffic Law Chatbot
 
-SEFT-RAG là một ứng dụng AI tiên tiến kết hợp **Retrieval-Augmented Generation (RAG)** với **Self-Reflective** capabilities. Hệ thống tự động đánh giá độ liên quan của tài liệu được truy xuất và quyết định có cần tìm kiếm trên Internet hay không, trước khi sinh ra câu trả lời.
+Traffic Law Chatbot is an AI-powered application designed to query and answer questions about **Vietnamese Road Traffic Laws** using **Retrieval-Augmented Generation (RAG)** technology. The system automatically retrieves and ranks relevant information from official legal documents before generating detailed and accurate responses for users.
 
-## 🎯 Tính Năng Chính
+## 🎯 Key Features
 
-- **RAG thông minh**: Kết hợp tri thức từ vector database (Chroma) và Internet (Tavily Search)
-- **Self-Reflective Pipeline**: Tự động đánh giá chất lượng tài liệu trước khi sinh câu trả lời
-- **Chưng cất kiến thức**: Hỗ trợ Wikipedia + Custom vector embeddings
-- **Giao diện người dùng**: Web app hiện đại với Nest.js và Next.js
-- **API RESTful**: Backend FastAPI để tích hợp với các ứng dụng khác
-- **Backend NestJS**: Một lựa chọn thay thế hoặc bổ sung cho API
+- **Accurate Retrieval (RAG)**: Search for relevant laws in the Chroma vector database built from official Vietnamese legal documents.
+- **Optimized Reranking**: Utilize `bge-reranker-base` to score and filter the most relevant document passages for the user's question.
+- **Smart Response Generation**: Powered by the `Llama-3.3-70B-Instruct` large language model via Hugging Face Hub API to generate high-quality responses with clear legal citations.
+- **Modern Interface**: Smooth real-time chat experience (streaming responses) provided by a complete web application built with a NestJS backend and Next.js frontend.
 
-## 🏗️ Kiến Trúc Dự Án
+## 🚀 Quick Start
 
-```
-SEFT-RAG/
-├── api.py                 # FastAPI backend với các endpoint chat
-├── app.py                 # Chainlit frontend để chat trực tiếp
-├── graph.py              # Lõi của hệ thống: LangGraph workflow
-├── requirements.txt      # Dependencies Python
-├── chroma_db/            # Vector database (Chroma) lưu trữ tài liệu
-├── backend/              # NestJS backend (tuỳ chọn)
-│   ├── src/
-│   ├── test/
-│   └── package.json
-├── frontend/             # Next.js frontend
-│   ├── app/
-│   ├── public/
-│   └── package.json
-└── __pycache__/         # Cache Python
-```
-
-## 🚀 Bắt Đầu Nhanh
-
-### Yêu Cầu Hệ Thống
+### Prerequisites
 - Python 3.10+
 - Node.js 18+
-- npm hoặc yarn
+- npm or yarn
 
-### Cài Đặt
+### Installation and Running
 
-#### 1. Clone và Chuẩn Bị Môi Trường Python
+#### 1. Prepare Python Environment & Start the AI Service
 
 ```bash
 cd d:\SEFT-RAG
 python -m venv venv
 .\venv\Scripts\Activate.ps1  # Windows PowerShell
-# Hoặc: source venv/bin/activate  # Linux/Mac
-```
-
-#### 2. Cài Đặt Dependencies Python
-
-```bash
 pip install -r requirements.txt
 ```
 
-#### 3. Cấu Hình Biến Môi Trường
-
-Tạo file `.env` ở thư mục gốc:
-
+Create a `.env` file in the root directory:
 ```env
-GROQ_API_KEY=your_groq_api_key_here
-TAVILY_API_KEY=your_tavily_api_key_here
-OPENAI_API_KEY=your_openai_api_key_here (tuỳ chọn)
+HF_TOKEN=your_huggingface_api_key_here
 ```
 
-Lấy API keys:
-- **Groq**: https://console.groq.com/keys
-- **Tavily**: https://tavily.com/
-- **OpenAI** (tuỳ chọn): https://platform.openai.com/api-keys
-
-#### 4. Khởi Tạo Vector Database (Nếu Cần)
-
-Vector database sẽ tự động tạo nếu không tồn tại. Lần đầu, hệ thống sẽ load dữ liệu từ Wikipedia về Diabetes mellitus.
-
-### Chạy Ứng Dụng
-
-#### Option 1: Chatbot Web (Chainlit)
-
-```bash
-chainlit run app.py
-```
-
-Truy cập tại: `http://localhost:8000`
-
-#### Option 2: API FastAPI
-
+Start the FastAPI AI Service:
 ```bash
 python api.py
 ```
+The service will run at `http://localhost:8000`. On the first startup, if the `chroma_db_pdf_v4` database does not exist, the system will automatically parse the PDF files in the root folder and initialize the vector database.
 
-API chạy tại: `http://localhost:8000`
-
-**Endpoint chính:**
-- `POST /chat` - Gửi câu hỏi và nhận câu trả lời
+#### 2. Start the Backend (NestJS)
 
 ```bash
-curl -X POST "http://localhost:8000/chat" \
-  -H "Content-Type: application/json" \
-  -d '{"question": "Bệnh tiểu đường là gì?"}'
-```
-
-#### Option 3: Backend NestJS (Tuỳ Chọn)
-
-```bash
-cd backend
+cd d:\SEFT-RAG\backend
 npm install
 npm run start:dev
 ```
+The backend gateway will run at `http://localhost:4000`.
 
-NestJS backend chạy tại: `http://localhost:3000`
-
-#### Option 4: Frontend Next.js
+#### 3. Start the Frontend (Next.js)
 
 ```bash
-cd frontend
+cd d:\SEFT-RAG\frontend
 npm install
 npm run dev
 ```
+The user interface will run at `http://localhost:3000`.
 
-Frontend chạy tại: `http://localhost:3000`
+## 📚 Tech Stack
 
-## 📚 Công Nghệ Sử Dụng
+### AI Service (Python)
+- **FastAPI**: Provides high-performance, real-time chat streaming endpoints.
+- **LangChain**: Used for parsing PDF files, splitting text into chunks, and managing the vector database.
+- **Chroma**: A local vector database for storing and querying embeddings.
+- **Sentence Transformers**: `paraphrase-multilingual-MiniLM-L12-v2` for generating high-quality Vietnamese text embeddings.
+- **CrossEncoder**: `bge-reranker-base` to perform document reranking and relevancy ranking.
+- **Hugging Face Hub API**: Connects to and streams tokens from the `Llama-3.3-70B-Instruct` model.
 
-### Backend Python
-- **LangChain**: Framework cho các LLM applications
-- **LangGraph**: Orchestration workflow và state management
-- **FastAPI**: Web framework hiệu năng cao
-- **Chainlit**: Giao diện chat tương tác
-- **Groq**: Model LLM (Llama 3.1 8B Instant) - nhanh và miễn phí
-- **Chroma**: Vector database
-- **Sentence Transformers**: Embedding models
-- **Tavily**: Web search API
-- **Wikipedia Loader**: Tải dữ liệu từ Wikipedia
+### Backend Gateway (Node.js)
+- **NestJS**: Manages API gateway routing and forwards data streams from the FastAPI AI service to the Next.js frontend.
 
-### Backend Node.js
-- **NestJS**: Framework TypeScript cho backend
-- **Axios**: HTTP client
+### Frontend (Next.js)
+- **Next.js & React**: Powers the interactive web chat interface, rendering streamed responses in real time using Server-Sent Events (SSE).
+- **Tailwind CSS**: Modern UI layout with premium dark mode styling.
 
-### Frontend
-- **Next.js**: React framework với SSR
-- **React 19**: Thư viện UI
-- **Tailwind CSS**: Styling
+## 🔄 RAG Workflow
 
-## 🔄 Luồng RAG
-
-```
-Câu Hỏi Người Dùng
-       ↓
-   [RETRIEVE] - Truy xuất từ Vector Database
-       ↓
-  [GRADE DOCUMENTS] - Đánh giá độ liên quan
-       ↓
-   Liên quan?
-       ├─ YES → [GENERATE] → Trả lời từ Local Docs
-       └─ NO  → [WEB SEARCH] → Tìm trên Internet → [GENERATE]
-       ↓
-   Câu Trả Lời Final
-```
-
-## 📖 Chi Tiết Các Nodes trong Graph
-
-### 1. **Retrieve Node**
-- Tìm kiếm tài liệu từ Chroma vector database
-- Sử dụng embedding từ Sentence Transformers
-- Mặc định lấy 4 tài liệu liên quan nhất
-
-### 2. **Grade Documents Node**
-- Dùng LLM để đánh giá xem tài liệu có trả lời câu hỏi không
-- Trả về JSON với `reasoning` (giải thích) và `binary_score` (yes/no)
-- Nếu không liên quan → chuyển sang Web Search
-
-### 3. **Web Search Node**
-- Sử dụng Tavily API để tìm kiếm trên Internet
-- Trả về 3 kết quả search tốt nhất
-- Chỉ kích hoạt khi tài liệu local không đủ
-
-### 4. **Generate Node**
-- Sử dụng Groq LLM để sinh câu trả lời
-- Input: Câu hỏi + tài liệu (từ Local DB hoặc Web Search)
-- Output: Câu trả lời chi tiết
-
-## 📝 Các File Chính
-
-### `graph.py`
-Lõi của hệ thống RAG. Định nghĩa:
-- Vector database setup
-- Các nodes của workflow (retrieve, grade, web_search, generate)
-- State management của LangGraph
-- Router logic để quyết định next node
-
-### `api.py`
-FastAPI server với endpoint `/chat`:
-- Nhận câu hỏi từ client
-- Chạy graph workflow
-- Trả về câu trả lời + các bước thực hiện
-
-### `app.py`
-Chainlit chatbot interface:
-- Giao diện chat thân thiện
-- Hiển thị quá trình suy luận (thinking process)
-- Step-by-step visualization của workflow
-
-## ⚙️ Cấu Hình Tùy Chọn
-
-### Thay đổi Model LLM
-
-Trong `graph.py`, tìm dòng:
-```python
-llm = ChatGroq(temperature=0, model_name="llama-3.1-8b-instant")
-```
-
-**Các options:**
-- `mixtral-8x7b-32768` - Mô hình lớn hơn, chất lượng cao hơn
-- Hoặc sử dụng OpenAI: `ChatOpenAI(model="gpt-4-turbo")`
-
-### Thay đổi Vector Database Source
-
-Sửa trong `setup_vector_db()`:
-```python
-loader = WikipediaLoader(query="Your Topic Here", load_max_docs=5)
-```
-
-### Điều Chỉnh Chunk Size
-
-Trong `graph.py`:
-```python
-splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-```
-- Tăng `chunk_size` → các tài liệu dài hơn
-- Tăng `chunk_overlap` → overlap nhiều hơn giữa các chunks
-
-## 📊 Ví Dụ Sử Dụng
-
-### Curl Request
-
-```bash
-curl -X POST "http://localhost:8000/chat" \
-  -H "Content-Type: application/json" \
-  -d '{"question": "Điều trị tiểu đường loại 2 như thế nào?"}'
-```
-
-### Response Example
-
-```json
-{
-  "answer": "Điều trị tiểu đường loại 2 bao gồm: ...",
-  "steps": [
-    {
-      "node": "retrieve",
-      "content": "Tìm thấy 4 tài liệu."
-    },
-    {
-      "node": "grade_documents",
-      "content": "Tài liệu liên quan."
-    },
-    {
-      "node": "generate",
-      "content": "Đã sinh câu trả lời."
-    }
-  ]
-}
-```
-
-## 🧪 Testing
-
-### Run Unit Tests (Backend NestJS)
-
-```bash
-cd backend
-npm test
-```
-
-### Run E2E Tests
-
-```bash
-npm run test:e2e
-```
-
-## 🐛 Troubleshooting
-
-### Lỗi: "GROQ_API_KEY not found"
-- Kiểm tra file `.env` có tồn tại và có `GROQ_API_KEY`
-- Chạy `python -m dotenv`
-
-### Lỗi: "Chroma database connection failed"
-- Xóa folder `chroma_db` và chạy lại
-- Hệ thống sẽ tự động tạo database mới
-
-### Chainlit UI không hiển thị
-- Đảm bảo port 8000 không bị chiếm dụng
-- Thử: `chainlit run app.py --port 8080`
-
-### Vector database quá chậm
-- Giảm `load_max_docs` trong `setup_vector_db()`
-- Sử dụng embedding model nhẹ hơn
-
-
+1. **Question Input**: The user sends a question from the Next.js frontend.
+2. **Keyword Optimization (Condense)**: FastAPI receives the question, reviews the chat history, and uses Llama-3 to rewrite it into a standalone question using formal Vietnamese legal terms.
+3. **Retrieval**: Queries the top 15 most similar document chunks from Chroma using the condensed question.
+4. **Reranking**: Uses CrossEncoder to score the 15 retrieved documents and filters for the top 2 best results.
+5. **Answer Generation**: Constructs a prompt containing the selected documents along with their legal sources and calls the Llama-3.3-70B model to stream the final answer back to the user.

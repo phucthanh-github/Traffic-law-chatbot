@@ -1,13 +1,10 @@
-langchain-groq
-langchain-openai
 langchain-community
 langchain-core
-langgraph
 chromadb
 sentence-transformers
-wikipedia
+pypdf
 python-dotenv
 pydantic
 fastapi 
 uvicorn
-tavily-python
+huggingface-hub
