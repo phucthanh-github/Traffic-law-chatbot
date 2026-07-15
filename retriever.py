@@ -13,18 +13,39 @@ from langchain_community.vectorstores import Chroma
 
 load_dotenv()
 
+LOW_RAM = os.getenv("LOW_RAM", "false").lower() == "true"
+print(f"--- LOW_RAM mode is: {LOW_RAM} ---")
+
 # --- 1. SETUP VECTOR DB ---
 def setup_vector_db():
-    import torch
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"---Using device for embeddings: {device}---")
-    embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-        model_kwargs={"device": device}
-    )
     db_path = "./chroma_db_pdf_v4"
+    
+    if LOW_RAM:
+        # Use Hugging Face Inference API for embeddings to save RAM
+        hf_token = os.getenv("HF_TOKEN")
+        if not hf_token:
+            raise ValueError("HF_TOKEN must be set in LOW_RAM mode to use Hugging Face Inference API Embeddings.")
+        print("--- Using Hugging Face Inference API for Embeddings (Low RAM Mode) ---")
+        from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
+        embeddings = HuggingFaceInferenceAPIEmbeddings(
+            api_key=hf_token,
+            model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+        )
+        search_k = 2  # Retrieve top 2 directly since we bypass reranking
+    else:
+        # Use local embeddings
+        import torch
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        print(f"--- Using device for local embeddings: {device} ---")
+        from langchain_community.embeddings import HuggingFaceEmbeddings
+        embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+            model_kwargs={"device": device}
+        )
+        search_k = 15
+        
     if os.path.exists(db_path):
-        return Chroma(persist_directory=db_path, embedding_function=embeddings).as_retriever(search_kwargs={"k": 15})
+        return Chroma(persist_directory=db_path, embedding_function=embeddings).as_retriever(search_kwargs={"k": search_k})
     
     # Khởi tạo DB từ các file PDF gốc
     print("---KHOI TAO CHROMA DB TU FILE PDF---")
@@ -120,8 +141,12 @@ def setup_vector_db():
 retriever = setup_vector_db()
 
 # --- 2. SETUP RERANKER ---
-from sentence_transformers import CrossEncoder
-import torch
-device = "cuda" if torch.cuda.is_available() else "cpu"
-print(f"---Using device for Reranker: {device}---")
-reranker = CrossEncoder("BAAI/bge-reranker-base", device=device)
+if not LOW_RAM:
+    from sentence_transformers import CrossEncoder
+    import torch
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"---Using device for Reranker: {device}---")
+    reranker = CrossEncoder("BAAI/bge-reranker-base", device=device)
+else:
+    reranker = None
+    print("--- Reranker is disabled in Low RAM Mode ---")

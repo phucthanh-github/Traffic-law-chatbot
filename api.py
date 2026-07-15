@@ -93,19 +93,27 @@ async def chat(request: ChatRequest):
             
             # 2. Thực hiện Rerank bằng BAAI/bge-reranker-base
             if raw_docs:
-                print("--- RERANKING WITH CROSS-ENCODER ---")
-                pairs = [[search_query, doc.page_content] for doc in raw_docs]
-                scores = reranker.predict(pairs)
-                doc_scores = sorted(zip(raw_docs, scores), key=lambda x: x[1], reverse=True)
-                for doc, score in doc_scores:
-                    doc.metadata["rerank_score"] = float(score)
-                top_docs = [doc for doc, score in doc_scores[:2]]
-                
-                # In ra console (chỉ sử dụng ASCII để tránh lỗi cp1252 trên Windows)
-                for idx, (doc, score) in enumerate(doc_scores[:2]):
-                    title = doc.metadata.get("article_title", "")
-                    name = doc.metadata.get("article_name", "")
-                    print(f"Top {idx+1}: {title} {name} | Rerank Score: {score:.4f}")
+                if reranker is not None:
+                    print("--- RERANKING WITH CROSS-ENCODER ---")
+                    pairs = [[search_query, doc.page_content] for doc in raw_docs]
+                    scores = reranker.predict(pairs)
+                    doc_scores = sorted(zip(raw_docs, scores), key=lambda x: x[1], reverse=True)
+                    for doc, score in doc_scores:
+                        doc.metadata["rerank_score"] = float(score)
+                    top_docs = [doc for doc, score in doc_scores[:2]]
+                    
+                    # In ra console (chỉ sử dụng ASCII để tránh lỗi cp1252 trên Windows)
+                    for idx, (doc, score) in enumerate(doc_scores[:2]):
+                        title = doc.metadata.get("article_title", "")
+                        name = doc.metadata.get("article_name", "")
+                        print(f"Top {idx+1}: {title} {name} | Rerank Score: {score:.4f}")
+                else:
+                    print("--- BYPASSING RERANKER (LOW RAM MODE) ---")
+                    top_docs = raw_docs[:2]
+                    for idx, doc in enumerate(top_docs):
+                        title = doc.metadata.get("article_title", "")
+                        name = doc.metadata.get("article_name", "")
+                        print(f"Top {idx+1}: {title} {name} (No Rerank Score)")
             else:
                 print("Khong tim thay tai lieu tho nao.")
                 top_docs = []
