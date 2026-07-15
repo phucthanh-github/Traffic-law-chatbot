@@ -8,3 +8,4 @@ pydantic
 fastapi 
 uvicorn
 huggingface-hub
+gradio
